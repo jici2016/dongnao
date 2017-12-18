@@ -84,7 +84,7 @@ public class Rizhi2Db {
 		}
 		String password="TZYK123#@!";
 		String user="tzyk";
-		String url="jdbc:mysql://60.205.104.234:3306/zhen?useUnicode=true&&characterEncoding=UTF-8";
+		String url="jdbc:mysql://****:*/*?useUnicode=true&&characterEncoding=UTF-8";
 		try {
 			conn=DriverManager.getConnection(url, user, password);
 			System.out.println(conn);
