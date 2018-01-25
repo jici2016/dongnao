@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<!-- 
+**************************************************************
+****** 这里的样式和DOM结构是基于JS SDK交互接口的示例实现 *****
+****** 有相关问题或建议可以邮件到 cameraopen-dev@360.cn  *****
+**************************************************************
+-->
+<html lang="zh-cmn-Hans">
+    <head>
+        <meta charset="utf-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+        <meta name="renderer" content="webkit"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+        <title>360智能摄像机个人播放器JS SDK演示实例</title>
+        <style type="text/css">
+        /** SDK示例所需要的CSS，可以按自己的业务需求参考实现 **/
+
+        /* 这里是单页全屏模式样式，所以宽高设为100% */
+        html,body,.player-wrap,.player-box{width:100%;height:100%; margin: 0; padding: 0;}
+        .player-wrap{ position: relative; background:#000; }
+        /* object默认为inline-block会导致元素后出现空行 */
+        .player-wrap object{display: block;}
+        /* 播放按钮样式 */
+        .player-wrap .btn-play{
+            position: absolute; left: 0; top: 0; bottom: 0; right: 0; cursor: pointer; 
+            background: url(http://p3.qhimg.com/t01ed86cd9f3180220a.png) no-repeat 50% 50%;
+            opacity: .5; -khtml-opacity: .5; -moz-opacity: .5; filter: alpha(opacity=50);
+            -webkit-transition: opacity 1s,background-color 1s;
+            -moz-transition: opacity 1s,background-color 1s;
+            -ms-transition: opacity 1s,background-color 1s;
+            -o-transition: opacity 1s,background-color 1s;
+            transition: opacity 1s,background-color 1s;
+        }
+        /* 播放按钮hover时高亮 */
+        .player-wrap .btn-play:hover{ opacity: 1; -khtml-opacity: 1; -moz-opacity: 1; filter: alpha(opacity=100); }
+        /* 播放按钮图标下方显示提示文案 */
+        .player-wrap .btn-play .err-msg{ 
+            position: absolute;top: 50%; left: 0; right: 0; margin-top: 35px; 
+            color: #fff; text-align: center; line-height: 22px; font-size: 14px;
+        }
+
+        /* 默认播放器容器隐藏，当初始化播放器时显示 */
+        .player-box{ display: none;}
+        .playing .player-box{display: block;}
+        .playing .btn-play{display: none; opacity:0;-khtml-opacity: 0; -moz-opacity: 0;}
+        </style>
+    </head>
+    <body>
+
+        <div class="player-wrap">
+            <!-- 播放器容器 -->
+            <div class="player-box" id="js_sdkplayer_box"></div>
+            <!-- 播放按钮+异常信息提示 -->
+            <div class="btn-play _init_player">
+                <div class="err-msg">点击播放</div>
+            </div>
+        </div>
+
+        <!-- SDK依赖 jQuery+swfobject -->
+        <script src="//dev.jia.360.cn/resource/js/jquery_1.8.3.js"></script>
+        <script src="//dev.jia.360.cn/resource/js/swfobject2.3.js"></script>
+        <script src="//dev.jia.360.cn/resource/js/dev_sdk_1.0.2.js?20171221"></script>
+
+        <script>
+        (function(){
+            /* 配置初始化SDK需要的参数 */
+            var sdkOptions = {
+            		/*
+                app_id: '12', 
+                uid: "100",
+                usid: "b:12:100:CLxh1KCJkZCIFSu6atKgrZA78JKkCmxgW/5Ux5eIZyM=",
+                sn: "36020114873",
+                sn_token: "LDINrkmkrdsxORT/Ztp9LdsSpJ67zAOUNk8WiHM0vqk=",
+                signKey: '15ef5f9ae2cd724214355470ef910f52'
+                */
+                
+                app_id: 'DCAADEKQMSOKQMSO', 
+                uid: "1",
+                usid: "b:DCAADEKQMSOKQMSO:1:KstLUS6ZfS4DvubLYTYZpeB4w7VL2OUL+GmWh1klu8o=",
+                sn: "360H1834302", /* 36020114873 为老版流测试设备 */
+                sn_token: "b:DCAADEKQMSOKQMSO:1:i9yyIe/66QaxiIgpYHTttd9F+4M4L25uTGWIjN8ZBTE=",
+                signKey: 'd718c0e93fd244cd5017cd3f1a7b77e1'
+                
+            };
+
+            /* url里带new字样则切换到新版流测试设备 - 调试用的，您的业务里如果不需要请删除 */
+            if(location.href.indexOf("new")>0){
+                sdkOptions.sn='36050700223';
+                sdkOptions.sn_token="E5KEQt1alJtscbIS9KW7XBzwTxSyqRA5MmpRqlLcfr8=";
+            }
+
+            /* 实例化SDK */
+            var sdk = window.sdk = new PlayerSdk(sdkOptions);
+
+            /* 如果需要控制播放器，则需要传参数，示例如下 */
+            var playerOptions = {
+                //默认的播放器容器ID是js_sdkplayer_box，如果想修改承载播放器的容器ID，可以增加一个参数playerboxId
+                playerboxId:'js_sdkplayer_box',
+                autostart: true, //是否自动播放
+                ctrbarhide: true //是否自动隐藏控制条
+            };
+            /* 可以直接放开下面这行代码，实现默认自动初始化播放器开始播放，当前示例为点击按钮开启播放 */
+            /*sdk.initPlayer(playerOptions); */
+
+
+            /*------------------- 下面监听事件，进行UI交互控制 -----------------------*/
+
+            /* 点击播放按钮，初始化播放器尝试播放 */
+            $(document).on("click","._init_player",function(e){
+                sdk.initPlayer(playerOptions);
+                return false;
+            });
+
+            var $playerWrap = $(".player-wrap"), $errMsg = $(".err-msg");
+
+            /****** 绑定的自定义事件 ********/
+            /*摄像机离线*/
+            sdk.on("offline", function(evt, data) {
+                $playerWrap.removeClass("playing");
+                $errMsg.html(data.errorMsg+"，点击重试。");
+                console.log('摄像机离线', data);
+            })
+            /*准备初始化播放器了*/
+            .on("begin_before", function(evt, data) {
+                $playerWrap.addClass("playing");
+                $errMsg.html("点击播放");
+                console.log('准备初始化播放器了',data);
+            })
+            /*播放器初始化完毕，要开始播放了*/
+            .on("begin", function(evt, data) {
+                console.log('播放器初始化完毕，要开始播放了');
+            })
+            /*停止播放*/
+            .on("stop", function(evt, data) {
+                $playerWrap.removeClass("playing");
+                //此时SDK中会自动从页面上移除FLASH播放器，需要你在这里写代码切换为可点击的播放按钮，以用于用户主动再次触发initPlayer
+                $errMsg.html("已停止播放，点击重新开启播放。");
+                console.log('停止播放', data);
+            })
+            /*出现其他未知错误*/
+            .on("error", function(evt, data) {
+                $playerWrap.removeClass("playing");
+                $errMsg.html(data.errorMsg+"，点击重试。");
+                console.log('出现未知错误', data);
+            })
+            /*摄像机已取消分享或解除绑定*/
+            .on("unbind", function(evt, data) {
+                $playerWrap.removeClass("playing");
+                $errMsg.html(data.errorMsg+"，点击重试。");
+                console.log('摄像机已取消分享或解除绑定', data);
+            })
+            /*摄像机关闭了*/
+            .on("closed", function(evt, data) {
+                $playerWrap.removeClass("playing");
+                $errMsg.html(data.errorMsg+"，点击重试。");
+                console.log('摄像机关闭了', data);
+            });
+        })();
+        </script>
+    </body>
+</html>
